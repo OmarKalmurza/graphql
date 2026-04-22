@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GraphQL Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="loader-overlay" id="loader">
+  <div class="loader-ring"></div>
+  <div class="loader-text">FETCHING DATA...</div>
+</div>
+
+<div id="login-page">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="title">PROFILE.SYS</div>
+      <div class="subtitle">SCHOOL 01 — YESSENOV</div>
+    </div>
+    <div class="terminal-prompt">AUTHENTICATE TO CONTINUE</div>
+
+    <div class="field">
+      <label>USERNAME OR EMAIL</label>
+      <input type="text" id="login-input" placeholder="user@example.com" autocomplete="username" />
+    </div>
+    <div class="field">
+      <label>PASSWORD</label>
+      <input type="password" id="pass-input" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+
+    <button class="btn-primary" id="login-btn" onclick="doLogin()">
+      AUTHENTICATE
+    </button>
+
+    <div class="error-msg" id="login-error"></div>
+  </div>
+</div>
+
+<div id="profile-page">
+  <div class="header">
+    <div class="header-logo">PROFILE.SYS</div>
+    <div class="header-user">
+      <div class="header-login" id="header-login">USER</div>
+      <button class="btn-logout" onclick="doLogout()">LOGOUT</button>
+    </div>
+  </div>
+
+  <div class="chart-tooltip" id="tooltip"></div>
+
+  <div class="profile-grid">
+    <div class="sidebar">
+
+      <div class="card">
+        <div class="card-label">IDENTITY</div>
+        <div class="avatar-section">
+          <div class="avatar-ring">
+            <svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="45" cy="45" r="40" fill="none" stroke="rgba(0,229,255,0.15)" stroke-width="1"/>
+              <circle cx="45" cy="45" r="40" fill="none" stroke="var(--accent)" stroke-width="1.5"
+                stroke-dasharray="15 8" stroke-linecap="round"/>
+            </svg>
+            <div class="avatar-inner" id="avatar-initials">??</div>
+          </div>
+          <div class="user-name" id="user-login">LOADING...</div>
+          <div class="user-id" id="user-id">ID: ---</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">TOTAL XP</div>
+        <div class="xp-display">
+          <div class="xp-number" id="xp-total">0</div>
+          <div class="xp-unit">EXPERIENCE POINTS</div>
+          <div class="xp-bar-container">
+            <div class="xp-bar-fill" id="xp-bar"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">AUDIT RATIO</div>
+        <div class="audit-ratio-display">
+          <div class="audit-col">
+            <div class="audit-num up" id="audit-up">0</div>
+            <div class="audit-lbl">DONE</div>
+          </div>
+          <div class="audit-divider">/</div>
+          <div class="audit-col">
+            <div class="audit-num down" id="audit-down">0</div>
+            <div class="audit-lbl">RECEIVED</div>
+          </div>
+        </div>
+        <div class="ratio-bar-wrap">
+          <div class="ratio-bar-fill" id="ratio-bar"></div>
+        </div>
+        <div class="stat-row" style="margin-top:0.8rem">
+          <span class="stat-label">RATIO</span>
+          <span class="stat-value cyan" id="ratio-val">—</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">STATS</div>
+        <div class="stat-row">
+          <span class="stat-label">TOTAL PROJECTS</span>
+          <span class="stat-value cyan" id="stat-total">—</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">PASSED</span>
+          <span class="stat-value" id="stat-pass">—</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">FAILED</span>
+          <span class="stat-value orange" id="stat-fail">—</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">PASS RATE</span>
+          <span class="stat-value" id="stat-rate">—</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="main-content">
+
+      <div class="graphs-grid">
+
+        <div class="graph-card" id="graph-xp">
+          <div class="graph-title">XP PROGRESSION OVER TIME</div>
+          <svg id="svg-xp" width="100%" height="220" class="chart"></svg>
+        </div>
+
+        <div class="graph-card" id="graph-ratio">
+          <div class="graph-title">PROJECTS PASS / FAIL RATIO</div>
+          <div style="display:flex;align-items:center;justify-content:center;gap:2rem;height:220px">
+            <svg id="svg-donut" width="130" height="130" viewBox="0 0 130 130">
+              <defs>
+                <filter id="glow-filter">
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                  <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+              <circle cx="65" cy="65" r="50" fill="none" stroke="rgba(30,58,74,0.5)" stroke-width="24"/>
+              <circle cx="65" cy="65" r="50" fill="none" class="donut-segment"
+                stroke="var(--accent3)" id="donut-fail" stroke-dashoffset="-0"
+                transform="rotate(-90 65 65)" />
+              <circle cx="65" cy="65" r="50" fill="none" class="donut-segment"
+                stroke="var(--accent2)" id="donut-pass" filter="url(#glow-filter)"
+                transform="rotate(-90 65 65)" />
+              <text x="65" y="60" text-anchor="middle" fill="var(--text)" font-family="var(--font-display)" font-size="18" font-weight="900" id="donut-pct">0%</text>
+              <text x="65" y="76" text-anchor="middle" fill="var(--text-dim)" font-family="var(--font-mono)" font-size="9" letter-spacing="1">PASS RATE</text>
+            </svg>
+            <div style="display:flex;flex-direction:column;gap:0.7rem">
+              <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.75rem">
+                <span style="width:10px;height:10px;background:var(--accent2);display:inline-block;box-shadow:0 0 6px var(--accent2)"></span>
+                <span class="stat-label">PASSED</span>
+                <span class="stat-value" id="donut-pass-n" style="margin-left:auto;min-width:30px;text-align:right">—</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.75rem">
+                <span style="width:10px;height:10px;background:var(--accent3);display:inline-block;"></span>
+                <span class="stat-label">FAILED</span>
+                <span class="stat-value orange" id="donut-fail-n" style="margin-left:auto;min-width:30px;text-align:right">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="graph-card" style="grid-column: span 2">
+          <div class="graph-title">TOP PROJECTS BY XP</div>
+          <svg id="svg-bars" width="100%" height="200" class="chart"></svg>
+        </div>
+
+      </div>
+
+      <div class="card">
+        <div class="card-label">RECENT TRANSACTIONS (XP)</div>
+        <div class="projects-list" id="projects-list">
+          <div style="color:var(--text-dim);font-size:0.8rem">Loading...</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
